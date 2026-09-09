@@ -8,17 +8,16 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --tg-theme-bg-color: var(--tg-color-bg, #17212b);
-            --tg-theme-secondary-bg-color: var(--tg-color-secondary-bg, #0e1621);
-            --tg-theme-text-color: var(--tg-color-text, #f5f5f5);
-            --tg-theme-hint-color: var(--tg-color-hint, #7f91a4);
-            --tg-theme-button-color: var(--tg-color-button, #5288c1);
-            --tg-theme-button-text-color: var(--tg-color-button-text, #ffffff);
-            
-            --success-color: #48c78e;
-            --danger-color: #f14668;
-            --warning-color: #ffe08a;
-            --accent-purple: #b5838d;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --input-bg: #0f172a;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-blue: #38bdf8;
+            --accent-green: #4ade80;
+            --accent-red: #f87171;
+            --accent-yellow: #facc15;
+            --border-color: #334155;
         }
 
         * {
@@ -27,30 +26,24 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--tg-theme-secondary-bg-color);
-            color: var(--tg-theme-text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
             margin: 0;
             padding: 12px;
+            padding-bottom: 90px;
             font-size: 14px;
         }
 
         .card {
-            background-color: var(--tg-theme-bg-color);
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 14px;
             margin-bottom: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
         }
 
-        h2, h3 {
-            margin: 0 0 10px 0;
-            font-weight: 600;
-            color: var(--tg-theme-text-color);
-        }
-
-        h2 { font-size: 1.1rem; }
-        h3 { font-size: 0.95rem; }
+        h2 { margin: 0 0 12px 0; font-size: 1.05rem; color: #fff; font-weight: 600; }
 
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
@@ -63,30 +56,31 @@
 
         label {
             font-size: 0.75rem;
-            color: var(--tg-theme-hint-color);
+            color: var(--text-muted);
         }
 
         input, select {
-            background-color: var(--tg-theme-secondary-bg-color);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: var(--tg-theme-text-color);
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: #ffffff !important;
             padding: 10px;
             border-radius: 8px;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+            font-weight: 600;
             outline: none;
             width: 100%;
         }
 
-        input:focus {
-            border-color: var(--tg-theme-button-color);
+        input:focus, select:focus {
+            border-color: var(--accent-blue);
         }
 
-        /* Переключатель тайма */
         .segmented-control {
             display: flex;
-            background-color: var(--tg-theme-secondary-bg-color);
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
             border-radius: 8px;
-            padding: 2px;
+            padding: 3px;
             margin-bottom: 12px;
         }
 
@@ -94,18 +88,17 @@
             flex: 1;
             background: none;
             border: none;
-            color: var(--tg-theme-hint-color);
-            padding: 8px 0;
+            color: var(--text-muted);
+            padding: 10px 0;
             font-size: 0.85rem;
             font-weight: 600;
             cursor: pointer;
             border-radius: 6px;
-            transition: 0.2s;
         }
 
         .segment-btn.active {
-            background-color: var(--tg-theme-button-color);
-            color: var(--tg-theme-button-text-color);
+            background-color: var(--accent-blue);
+            color: #0f172a;
         }
 
         .results-grid {
@@ -116,31 +109,20 @@
         }
 
         .result-card {
-            background-color: var(--tg-theme-secondary-bg-color);
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
             padding: 10px;
             border-radius: 8px;
             text-align: center;
         }
 
-        .result-card .title {
-            font-size: 0.75rem;
-            color: var(--tg-theme-hint-color);
-        }
+        .result-card .title { font-size: 0.75rem; color: var(--text-muted); }
+        .result-card .value { font-size: 1.15rem; font-weight: 700; margin-top: 4px; color: #ffffff !important; }
 
-        .result-card .value {
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin-top: 4px;
-        }
+        .ev-positive { color: var(--accent-green) !important; }
+        .ev-negative { color: var(--accent-red) !important; }
 
-        .ev-positive { color: var(--success-color); }
-        .ev-negative { color: var(--danger-color); }
-
-        /* Таблица */
-        .table-wrapper {
-            overflow-x: auto;
-            margin-top: 10px;
-        }
+        .table-wrapper { overflow-x: auto; margin-top: 12px; }
 
         table {
             width: 100%;
@@ -149,136 +131,66 @@
         }
 
         th, td {
-            border: 1px solid rgba(255,255,255,0.08);
+            border: 1px solid var(--border-color);
             padding: 6px;
             text-align: center;
+            color: #ffffff;
         }
 
-        th {
-            background-color: var(--tg-theme-secondary-bg-color);
-            color: var(--tg-theme-hint-color);
-        }
+        th { background-color: var(--input-bg); color: var(--text-muted); }
 
-        /* Чтение языка букмекера */
         .speech-box {
-            background-color: rgba(255, 224, 138, 0.08);
-            border-left: 3px solid var(--warning-color);
+            background-color: rgba(250, 204, 21, 0.1);
+            border-left: 3px solid var(--accent-yellow);
             padding: 10px;
             border-radius: 4px;
             margin-top: 10px;
             font-size: 0.85rem;
-            line-height: 1.3;
-            color: var(--tg-theme-text-color);
+            line-height: 1.4;
+            color: #fef08a;
         }
 
         .speech-title {
             font-weight: bold;
-            color: var(--warning-color);
+            color: var(--accent-yellow);
             margin-bottom: 4px;
             font-size: 0.8rem;
         }
 
-        .btn-calc {
-            background-color: var(--tg-theme-button-color);
-            color: var(--tg-theme-button-text-color);
+        /* Постоянная фиксированная кнопка внизу */
+        .btn-send {
+            position: fixed;
+            bottom: 12px;
+            left: 12px;
+            right: 12px;
+            background-color: var(--accent-blue);
+            color: #0f172a;
             border: none;
-            padding: 12px;
+            padding: 14px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4);
+            z-index: 999;
+        }
+
+        .btn-calc {
+            background-color: var(--accent-blue);
+            color: #0f172a;
+            border: none;
+            padding: 10px;
             border-radius: 8px;
             font-weight: bold;
             width: 100%;
             margin-top: 10px;
-            font-size: 0.95rem;
             cursor: pointer;
         }
     </style>
-
-<style>
-body {
-  margin: 0;
-  font-family: Inter, system-ui, sans-serif;
-  color: #0f172a;
-  background: #f8fafc;
-}
-
-.site-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 22px clamp(18px, 5vw, 56px);
-  background: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.logo {
-  font-weight: 800;
-  letter-spacing: .02em;
-}
-
-nav {
-  display: flex;
-  gap: 16px;
-}
-
-.hero {
-  padding: clamp(38px, 8vw, 90px) clamp(18px, 5vw, 56px);
-  background: #eaf0ff;
-}
-
-.eyebrow {
-  margin: 0 0 12px;
-  color: #2563eb;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .08em;
-}
-
-h1 {
-  max-width: 720px;
-  margin: 0 0 16px;
-  font-size: clamp(36px, 8vw, 76px);
-  line-height: 1;
-}
-
-button {
-  min-height: 42px;
-  padding: 0 18px;
-  border: 0;
-  border-radius: 999px;
-  background: #2563eb;
-  color: #ffffff;
-  font-weight: 700;
-}
-
-.cards {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-  padding: 24px clamp(18px, 5vw, 56px);
-}
-
-.cards article {
-  padding: 18px;
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  background: #ffffff;
-}
-
-@media (max-width: 720px) {
-  .site-header {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .cards {
-    grid-template-columns: 1fr;
-  }
-}
-</style>
 </head>
 <body>
 
-    <!-- 1. Настройки и средние значения -->
+    <!-- Параметры -->
     <div class="card">
         <h2>📊 Параметры угловых (Матч)</h2>
         <div class="grid-2">
@@ -309,17 +221,16 @@ button {
         <button class="btn-calc" onclick="calculateAll()">Пересчитать модель</button>
     </div>
 
-    <!-- 2. Выбор тайма и распределение -->
+    <!-- Тайм -->
     <div class="card">
         <div class="segmented-control">
             <button class="segment-btn active" id="btnHalf1" onclick="setHalf(1)">1-й Тайм (44%)</button>
             <button class="segment-btn" id="btnHalf2" onclick="setHalf(2)">2-й Тайм (56%)</button>
         </div>
-
         <div id="halfResults"></div>
     </div>
 
-    <!-- 3. Декодер линии и Язык Букмекеры -->
+    <!-- Декодер коэффициентов -->
     <div class="card">
         <h2>🗣 Декодер «Языка Букмекеры»</h2>
         <div class="grid-2">
@@ -336,23 +247,19 @@ button {
         <div id="decoderOutput"></div>
     </div>
 
+    <!-- Фиксированная кнопка -->
+    <button class="btn-send" onclick="sendDataToChat()">📩 Отправить расчет в чат</button>
+
 <script>
-    // Инициализация Telegram WebApp
     const tg = window.Telegram.WebApp;
     tg.expand();
     tg.ready();
 
     let activeHalf = 1;
     let mathData = {};
-    const phi = 1.18; // Серийность угловых
+    const phi = 1.18;
+    let currentAnalysis = {};
 
-    function triggerHaptic() {
-        if (tg.HapticFeedback) {
-            tg.HapticFeedback.impactOccurred('light');
-        }
-    }
-
-    // Форматирование чисел под тенге (например: 100 000 ₸)
     function formatKZT(amount) {
         return new Intl.NumberFormat('ru-RU').format(Math.round(amount)) + ' ₸';
     }
@@ -365,7 +272,6 @@ button {
     }
 
     function setHalf(half) {
-        triggerHaptic();
         activeHalf = half;
         document.getElementById('btnHalf1').classList.toggle('active', half === 1);
         document.getElementById('btnHalf2').classList.toggle('active', half === 2);
@@ -379,7 +285,6 @@ button {
     }
 
     function calculateAll() {
-        triggerHaptic();
         const homeAvg = parseFloat(document.getElementById('homeAvg').value) || 0;
         const awayAvg = parseFloat(document.getElementById('awayAvg').value) || 0;
 
@@ -442,7 +347,6 @@ button {
 
         html += `</div>`;
 
-        // Компактная таблица вероятностей
         html += `<div class="table-wrapper"><table><tr><th>Угл</th>`;
         for (let k = 0; k <= 7; k++) html += `<th>${k}</th>`;
         html += `<th>8+</th></tr><tr><td>%</td>`;
@@ -461,8 +365,6 @@ button {
         if (!kOver || !kUnder || kOver <= 1 || kUnder <= 1) return;
 
         const margin = ((1 / kOver) + (1 / kUnder) - 1) * 100;
-        const realBookieOverP = (1 / kOver) / ((1 / kOver) + (1 / kUnder));
-        
         const targetTotal = activeHalf === 1 ? 3.5 : 4.5;
         const myProbOver = mathData[activeHalf] ? mathData[activeHalf].totals[targetTotal].over : 0.5;
 
@@ -470,13 +372,11 @@ button {
 
         let speech = "";
         if (margin > 7.5) {
-            speech = `«Заложена высокая маржа (${margin.toFixed(1)}%). Букмекер страхует риски и закладывает комиссию.»`;
-        } else if (realBookieOverP > myProbOver + 0.08) {
-            speech = `«Букмекер считает вероятность ТБ выше нашей статистики. Возможен учет погодных условий или стартовых составов.»`;
+            speech = `Заложена высокая маржа (${margin.toFixed(1)}%). Букмекер страхует риски.`;
         } else if (evOver > 0.04) {
-            speech = `«БК дал переоцененный кэф ${kOver}. Наша модель видит валуй (EV +${(evOver * 100).toFixed(1)}%).»`;
+            speech = `БК дал переоцененный кэф ${kOver}. Наша модель видит валуй (EV +${(evOver * 100).toFixed(1)}%).`;
         } else {
-            speech = `«Линия сбалансирована. Оценка букмекера совпадает с нашей математикой.»`;
+            speech = `Линия сбалансирована. Оценка букмекера совпадает с математикой.`;
         }
 
         const bankroll = parseFloat(document.getElementById('bankroll').value) || 100000;
@@ -487,6 +387,20 @@ button {
         if (kelly < 0) kelly = 0;
 
         const stakeAmountKZT = bankroll * kelly;
+
+        currentAnalysis = {
+            half: activeHalf,
+            expected: mathData[activeHalf] ? mathData[activeHalf].expected.toFixed(2) : 0,
+            targetTotal: targetTotal,
+            probOver: (myProbOver * 100).toFixed(1),
+            kOver: kOver,
+            kUnder: kUnder,
+            margin: margin.toFixed(1),
+            ev: (evOver * 100).toFixed(1),
+            stakeKZT: formatKZT(stakeAmountKZT),
+            kellyPercent: (kelly * 100).toFixed(1),
+            speech: speech
+        };
 
         document.getElementById('decoderOutput').innerHTML = `
             <div class="results-grid">
@@ -500,7 +414,7 @@ button {
                 </div>
                 <div class="result-card" style="grid-column: span 2;">
                     <div class="title">Рекомендованная ставка</div>
-                    <div class="value" style="color:var(--tg-theme-button-color);">${formatKZT(stakeAmountKZT)} (${(kelly * 100).toFixed(1)}% от банка)</div>
+                    <div class="value" style="color:var(--accent-blue);">${formatKZT(stakeAmountKZT)} (${(kelly * 100).toFixed(1)}% от банка)</div>
                 </div>
             </div>
 
@@ -511,19 +425,26 @@ button {
         `;
     }
 
+    function sendDataToChat() {
+        if (!currentAnalysis.targetTotal) return;
+
+        const report = `📊 ОТЧЕТ ПО УГЛОВЫМ (${currentAnalysis.half}-й Тайм)\n\n` +
+            `🎯 Ожидаемо угловых: ${currentAnalysis.expected}\n` +
+            `📈 Шанс ТБ ${currentAnalysis.targetTotal}: ${currentAnalysis.probOver}%\n` +
+            `🎲 Кэфы БК: ТБ ${currentAnalysis.kOver} | ТМ ${currentAnalysis.kUnder}\n` +
+            `📌 Маржа БК: ${currentAnalysis.margin}%\n` +
+            `💡 EV (Ценность): ${currentAnalysis.ev}%\n\n` +
+            `💰 РЕКОМЕНДАЦИЯ:\n` +
+            `Ставка: ${currentAnalysis.stakeKZT} (${currentAnalysis.kellyPercent}% от банка)\n\n` +
+            `💬 Мысль БК: ${currentAnalysis.speech}`;
+
+        tg.sendData(report);
+    }
+
     window.onload = function() {
         calculateAll();
     };
 </script>
 
-
-<script>
-const button = document.querySelector("#cta");
-
-button?.addEventListener("click", () => {
-  button.textContent = "JavaScript работает";
-  button.style.background = "#1a8a4a";
-});
-</script>
 </body>
 </html>
