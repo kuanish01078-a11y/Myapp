@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Corners & Bookie Decoder TG (KZT)</title>
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --tg-theme-bg-color: var(--tg-color-bg, #17212b);
+            --tg-theme-secondary-bg-color: var(--tg-color-secondary-bg, #0e1621);
+            --tg-theme-text-color: var(--tg-color-text, #f5f5f5);
+            --tg-theme-hint-color: var(--tg-color-hint, #7f91a4);
+            --tg-theme-button-color: var(--tg-color-button, #5288c1);
+            --tg-theme-button-text-color: var(--tg-color-button-text, #ffffff);
+            
+            --success-color: #48c78e;
+            --danger-color: #f14668;
+            --warning-color: #ffe08a;
+            --accent-purple: #b5838d;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--tg-theme-secondary-bg-color);
+            color: var(--tg-theme-text-color);
+            margin: 0;
+            padding: 12px;
+            font-size: 14px;
+        }
+
+        .card {
+            background-color: var(--tg-theme-bg-color);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        h2, h3 {
+            margin: 0 0 10px 0;
+            font-weight: 600;
+            color: var(--tg-theme-text-color);
+        }
+
+        h2 { font-size: 1.1rem; }
+        h3 { font-size: 0.95rem; }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+
+        label {
+            font-size: 0.75rem;
+            color: var(--tg-theme-hint-color);
+        }
+
+        input, select {
+            background-color: var(--tg-theme-secondary-bg-color);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--tg-theme-text-color);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            outline: none;
+            width: 100%;
+        }
+
+        input:focus {
+            border-color: var(--tg-theme-button-color);
+        }
+
+        /* Переключатель тайма */
+        .segmented-control {
+            display: flex;
+            background-color: var(--tg-theme-secondary-bg-color);
+            border-radius: 8px;
+            padding: 2px;
+            margin-bottom: 12px;
+        }
+
+        .segment-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--tg-theme-hint-color);
+            padding: 8px 0;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: 0.2s;
+        }
+
+        .segment-btn.active {
+            background-color: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .result-card {
+            background-color: var(--tg-theme-secondary-bg-color);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .result-card .title {
+            font-size: 0.75rem;
+            color: var(--tg-theme-hint-color);
+        }
+
+        .result-card .value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-top: 4px;
+        }
+
+        .ev-positive { color: var(--success-color); }
+        .ev-negative { color: var(--danger-color); }
+
+        /* Таблица */
+        .table-wrapper {
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+
+        th, td {
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 6px;
+            text-align: center;
+        }
+
+        th {
+            background-color: var(--tg-theme-secondary-bg-color);
+            color: var(--tg-theme-hint-color);
+        }
+
+        /* Чтение языка букмекера */
+        .speech-box {
+            background-color: rgba(255, 224, 138, 0.08);
+            border-left: 3px solid var(--warning-color);
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            line-height: 1.3;
+            color: var(--tg-theme-text-color);
+        }
+
+        .speech-title {
+            font-weight: bold;
+            color: var(--warning-color);
+            margin-bottom: 4px;
+            font-size: 0.8rem;
+        }
+
+        .btn-calc {
+            background-color: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 10px;
+            font-size: 0.95rem;
+            cursor: pointer;
+        }
+    </style>
+
+<style>
+body {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  color: #0f172a;
+  background: #f8fafc;
+}
+
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px clamp(18px, 5vw, 56px);
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.logo {
+  font-weight: 800;
+  letter-spacing: .02em;
+}
+
+nav {
+  display: flex;
+  gap: 16px;
+}
+
+.hero {
+  padding: clamp(38px, 8vw, 90px) clamp(18px, 5vw, 56px);
+  background: #eaf0ff;
+}
+
+.eyebrow {
+  margin: 0 0 12px;
+  color: #2563eb;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+h1 {
+  max-width: 720px;
+  margin: 0 0 16px;
+  font-size: clamp(36px, 8vw, 76px);
+  line-height: 1;
+}
+
+button {
+  min-height: 42px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 999px;
+  background: #2563eb;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  padding: 24px clamp(18px, 5vw, 56px);
+}
+
+.cards article {
+  padding: 18px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+@media (max-width: 720px) {
+  .site-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .cards {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+</head>
+<body>
+
+    <!-- 1. Настройки и средние значения -->
+    <div class="card">
+        <h2>📊 Параметры угловых (Матч)</h2>
+        <div class="grid-2">
+            <div class="form-group">
+                <label for="homeAvg">Угл. Хозяев</label>
+                <input type="number" id="homeAvg" step="0.1" value="5.8" inputmode="decimal">
+            </div>
+            <div class="form-group">
+                <label for="awayAvg">Угл. Гостей</label>
+                <input type="number" id="awayAvg" step="0.1" value="4.4" inputmode="decimal">
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="form-group">
+                <label for="bankroll">Банк (₸)</label>
+                <input type="number" id="bankroll" value="100000" step="1000" inputmode="numeric">
+            </div>
+            <div class="form-group">
+                <label for="kellyFraction">Келли (Риск)</label>
+                <select id="kellyFraction">
+                    <option value="0.25">1/4 Kelly (Безопасный)</option>
+                    <option value="0.5">1/2 Kelly (Умеренный)</option>
+                    <option value="1.0">Full Kelly (Агрессивный)</option>
+                </select>
+            </div>
+        </div>
+        <button class="btn-calc" onclick="calculateAll()">Пересчитать модель</button>
+    </div>
+
+    <!-- 2. Выбор тайма и распределение -->
+    <div class="card">
+        <div class="segmented-control">
+            <button class="segment-btn active" id="btnHalf1" onclick="setHalf(1)">1-й Тайм (44%)</button>
+            <button class="segment-btn" id="btnHalf2" onclick="setHalf(2)">2-й Тайм (56%)</button>
+        </div>
+
+        <div id="halfResults"></div>
+    </div>
+
+    <!-- 3. Декодер линии и Язык Букмекеры -->
+    <div class="card">
+        <h2>🗣 Декодер «Языка Букмекеры»</h2>
+        <div class="grid-2">
+            <div class="form-group">
+                <label for="kOver">Кэф на ТБ (<span id="targetTotalLabel">3.5</span>)</label>
+                <input type="number" id="kOver" step="0.01" value="1.95" inputmode="decimal" oninput="decodeBookie()">
+            </div>
+            <div class="form-group">
+                <label for="kUnder">Кэф на ТМ (<span id="targetTotalLabelUnder">3.5</span>)</label>
+                <input type="number" id="kUnder" step="0.01" value="1.85" inputmode="decimal" oninput="decodeBookie()">
+            </div>
+        </div>
+
+        <div id="decoderOutput"></div>
+    </div>
+
+<script>
+    // Инициализация Telegram WebApp
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+    tg.ready();
+
+    let activeHalf = 1;
+    let mathData = {};
+    const phi = 1.18; // Серийность угловых
+
+    function triggerHaptic() {
+        if (tg.HapticFeedback) {
+            tg.HapticFeedback.impactOccurred('light');
+        }
+    }
+
+    // Форматирование чисел под тенге (например: 100 000 ₸)
+    function formatKZT(amount) {
+        return new Intl.NumberFormat('ru-RU').format(Math.round(amount)) + ' ₸';
+    }
+
+    function customPoisson(k, lambda, phi) {
+        let adjLambda = lambda / phi;
+        let factorial = 1;
+        for (let i = 1; i <= k; i++) factorial *= i;
+        return (Math.pow(adjLambda, k) * Math.exp(-adjLambda)) / factorial;
+    }
+
+    function setHalf(half) {
+        triggerHaptic();
+        activeHalf = half;
+        document.getElementById('btnHalf1').classList.toggle('active', half === 1);
+        document.getElementById('btnHalf2').classList.toggle('active', half === 2);
+        
+        const target = half === 1 ? '3.5' : '4.5';
+        document.getElementById('targetTotalLabel').innerText = target;
+        document.getElementById('targetTotalLabelUnder').innerText = target;
+
+        renderHalfUI();
+        decodeBookie();
+    }
+
+    function calculateAll() {
+        triggerHaptic();
+        const homeAvg = parseFloat(document.getElementById('homeAvg').value) || 0;
+        const awayAvg = parseFloat(document.getElementById('awayAvg').value) || 0;
+
+        mathData[1] = processHalf(homeAvg * 0.44, awayAvg * 0.44, [3.5, 4.5, 5.5]);
+        mathData[2] = processHalf(homeAvg * 0.56, awayAvg * 0.56, [4.5, 5.5, 6.5]);
+
+        renderHalfUI();
+        decodeBookie();
+    }
+
+    function processHalf(lHome, lAway, totals) {
+        let maxC = 12;
+        let probArray = new Array(maxC + 1).fill(0);
+
+        for (let i = 0; i <= 8; i++) {
+            let pH = customPoisson(i, lHome, phi);
+            for (let j = 0; j <= 8; j++) {
+                let pA = customPoisson(j, lAway, phi);
+                if (i + j <= maxC) probArray[i + j] += pH * pA;
+            }
+        }
+
+        let sumP = probArray.reduce((a, b) => a + b, 0);
+        probArray = probArray.map(p => p / sumP);
+
+        let resTotals = {};
+        totals.forEach(t => {
+            let overP = probArray.slice(Math.floor(t) + 1).reduce((a, b) => a + b, 0);
+            resTotals[t] = { over: overP, under: 1 - overP };
+        });
+
+        return {
+            expected: lHome + lAway,
+            probArray: probArray,
+            totals: resTotals
+        };
+    }
+
+    function renderHalfUI() {
+        const data = mathData[activeHalf];
+        if (!data) return;
+
+        let html = `
+            <div class="results-grid">
+                <div class="result-card">
+                    <div class="title">Ожидаемо угл.</div>
+                    <div class="value">${data.expected.toFixed(2)}</div>
+                </div>
+        `;
+
+        Object.keys(data.totals).forEach(t => {
+            let overP = (data.totals[t].over * 100).toFixed(1);
+            html += `
+                <div class="result-card">
+                    <div class="title">Шанс ТБ ${t}</div>
+                    <div class="value">${overP}%</div>
+                </div>
+            `;
+        });
+
+        html += `</div>`;
+
+        // Компактная таблица вероятностей
+        html += `<div class="table-wrapper"><table><tr><th>Угл</th>`;
+        for (let k = 0; k <= 7; k++) html += `<th>${k}</th>`;
+        html += `<th>8+</th></tr><tr><td>%</td>`;
+        for (let k = 0; k <= 7; k++) html += `<td>${(data.probArray[k] * 100).toFixed(0)}</td>`;
+        
+        let p8Plus = data.probArray.slice(8).reduce((a, b) => a + b, 0);
+        html += `<td>${(p8Plus * 100).toFixed(0)}</td></tr></table></div>`;
+
+        document.getElementById('halfResults').innerHTML = html;
+    }
+
+    function decodeBookie() {
+        const kOver = parseFloat(document.getElementById('kOver').value);
+        const kUnder = parseFloat(document.getElementById('kUnder').value);
+
+        if (!kOver || !kUnder || kOver <= 1 || kUnder <= 1) return;
+
+        const margin = ((1 / kOver) + (1 / kUnder) - 1) * 100;
+        const realBookieOverP = (1 / kOver) / ((1 / kOver) + (1 / kUnder));
+        
+        const targetTotal = activeHalf === 1 ? 3.5 : 4.5;
+        const myProbOver = mathData[activeHalf] ? mathData[activeHalf].totals[targetTotal].over : 0.5;
+
+        const evOver = (myProbOver * kOver) - 1;
+
+        let speech = "";
+        if (margin > 7.5) {
+            speech = `«Заложена высокая маржа (${margin.toFixed(1)}%). Букмекер страхует риски и закладывает комиссию.»`;
+        } else if (realBookieOverP > myProbOver + 0.08) {
+            speech = `«Букмекер считает вероятность ТБ выше нашей статистики. Возможен учет погодных условий или стартовых составов.»`;
+        } else if (evOver > 0.04) {
+            speech = `«БК дал переоцененный кэф ${kOver}. Наша модель видит валуй (EV +${(evOver * 100).toFixed(1)}%).»`;
+        } else {
+            speech = `«Линия сбалансирована. Оценка букмекера совпадает с нашей математикой.»`;
+        }
+
+        const bankroll = parseFloat(document.getElementById('bankroll').value) || 100000;
+        const fraction = parseFloat(document.getElementById('kellyFraction').value) || 0.25;
+        const b = kOver - 1;
+        const q = 1 - myProbOver;
+        let kelly = ((b * myProbOver - q) / b) * fraction;
+        if (kelly < 0) kelly = 0;
+
+        const stakeAmountKZT = bankroll * kelly;
+
+        document.getElementById('decoderOutput').innerHTML = `
+            <div class="results-grid">
+                <div class="result-card">
+                    <div class="title">Маржа БК</div>
+                    <div class="value">${margin.toFixed(1)}%</div>
+                </div>
+                <div class="result-card">
+                    <div class="title">EV Ставки</div>
+                    <div class="value ${evOver > 0 ? 'ev-positive' : 'ev-negative'}">${(evOver * 100).toFixed(1)}%</div>
+                </div>
+                <div class="result-card" style="grid-column: span 2;">
+                    <div class="title">Рекомендованная ставка</div>
+                    <div class="value" style="color:var(--tg-theme-button-color);">${formatKZT(stakeAmountKZT)} (${(kelly * 100).toFixed(1)}% от банка)</div>
+                </div>
+            </div>
+
+            <div class="speech-box">
+                <div class="speech-title">💡 МЫСЛЬ БУКМЕКЕРА:</div>
+                ${speech}
+            </div>
+        `;
+    }
+
+    window.onload = function() {
+        calculateAll();
+    };
+</script>
+
+
+<script>
+const button = document.querySelector("#cta");
+
+button?.addEventListener("click", () => {
+  button.textContent = "JavaScript работает";
+  button.style.background = "#1a8a4a";
+});
+</script>
+</body>
+</html>
