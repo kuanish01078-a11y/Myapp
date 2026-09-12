@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Corners & Bookie Decoder TG (KZT)</title>
+    <title>Corners & Bookie Decoder Pro</title>
     <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
@@ -17,6 +17,7 @@
             --accent-green: #4ade80;
             --accent-red: #f87171;
             --accent-yellow: #facc15;
+            --accent-purple: #c084fc;
             --border-color: #334155;
         }
 
@@ -43,9 +44,18 @@
             margin-bottom: 12px;
         }
 
-        h2 { margin: 0 0 12px 0; font-size: 1.05rem; color: #fff; font-weight: 600; }
+        h2 { 
+            margin: 0 0 10px 0; 
+            font-size: 1rem; 
+            color: #fff; 
+            font-weight: 600; 
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
 
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 
         .form-group {
             display: flex;
@@ -65,7 +75,7 @@
             color: #ffffff !important;
             padding: 10px;
             border-radius: 8px;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 600;
             outline: none;
             width: 100%;
@@ -89,11 +99,12 @@
             background: none;
             border: none;
             color: var(--text-muted);
-            padding: 10px 0;
-            font-size: 0.85rem;
+            padding: 8px 0;
+            font-size: 0.8rem;
             font-weight: 600;
             cursor: pointer;
             border-radius: 6px;
+            transition: all 0.2s ease;
         }
 
         .segment-btn.active {
@@ -116,23 +127,23 @@
             text-align: center;
         }
 
-        .result-card .title { font-size: 0.75rem; color: var(--text-muted); }
-        .result-card .value { font-size: 1.15rem; font-weight: 700; margin-top: 4px; color: #ffffff !important; }
+        .result-card .title { font-size: 0.72rem; color: var(--text-muted); }
+        .result-card .value { font-size: 1.1rem; font-weight: 700; margin-top: 4px; color: #ffffff !important; }
 
         .ev-positive { color: var(--accent-green) !important; }
         .ev-negative { color: var(--accent-red) !important; }
 
-        .table-wrapper { overflow-x: auto; margin-top: 12px; }
+        .table-wrapper { overflow-x: auto; margin-top: 10px; }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.8rem;
+            font-size: 0.78rem;
         }
 
         th, td {
             border: 1px solid var(--border-color);
-            padding: 6px;
+            padding: 6px 4px;
             text-align: center;
             color: #ffffff;
         }
@@ -157,7 +168,6 @@
             font-size: 0.8rem;
         }
 
-        /* Постоянная фиксированная кнопка внизу */
         .btn-send {
             position: fixed;
             bottom: 12px;
@@ -186,48 +196,108 @@
             margin-top: 10px;
             cursor: pointer;
         }
+
+        .badge {
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--accent-blue);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+        }
     </style>
 </head>
 <body>
 
-    <!-- Параметры -->
+    <!-- Сезонная статистика команд -->
     <div class="card">
-        <h2>📊 Параметры угловых (Матч)</h2>
+        <h2>📅 Сезонный профиль команд <span class="badge">Статистика года</span></h2>
+        
+        <div class="segmented-control">
+            <button class="segment-btn active" id="btnSeasonFull" onclick="setSeasonPeriod('full')">Весь год</button>
+            <button class="segment-btn" id="btnSeasonAutumn" onclick="setSeasonPeriod('autumn')">Осень (Старт)</button>
+            <button class="segment-btn" id="btnSeasonSpring" onclick="setSeasonPeriod('spring')">Весна (Финиш)</button>
+        </div>
+
         <div class="grid-2">
             <div class="form-group">
-                <label for="homeAvg">Угл. Хозяев</label>
-                <input type="number" id="homeAvg" step="0.1" value="5.8" inputmode="decimal">
+                <label for="homeTeamName">Хозяева (Название)</label>
+                <input type="text" id="homeTeamName" value="Команда 1" onchange="calculateAll()">
             </div>
             <div class="form-group">
-                <label for="awayAvg">Угл. Гостей</label>
-                <input type="number" id="awayAvg" step="0.1" value="4.4" inputmode="decimal">
+                <label for="awayTeamName">Гости (Название)</label>
+                <input type="text" id="awayTeamName" value="Команда 2" onchange="calculateAll()">
             </div>
         </div>
 
         <div class="grid-2">
             <div class="form-group">
+                <label for="homeAvgFull">Угл. Хозяева (Дома)</label>
+                <input type="number" id="homeAvgFull" step="0.1" value="6.2" inputmode="decimal" oninput="calculateAll()">
+            </div>
+            <div class="form-group">
+                <label for="awayAvgFull">Угл. Гости (Выезд)</label>
+                <input type="number" id="awayAvgFull" step="0.1" value="4.1" inputmode="decimal" oninput="calculateAll()">
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="form-group">
+                <label for="homeConceded">Допущено Хозяевами</label>
+                <input type="number" id="homeConceded" step="0.1" value="3.5" inputmode="decimal" oninput="calculateAll()" title="Сколько угловых соперник подает у ворот хозяев">
+            </div>
+            <div class="form-group">
+                <label for="awayConceded">Допущено Гостями</label>
+                <input type="number" id="awayConceded" step="0.1" value="5.8" inputmode="decimal" oninput="calculateAll()" title="Сколько угловых хозяева подают у ворот гостей">
+            </div>
+        </div>
+    </div>
+
+    <!-- Управление банком -->
+    <div class="card">
+        <h2>💰 Управление банком & Модель</h2>
+        <div class="grid-2">
+            <div class="form-group">
                 <label for="bankroll">Банк (₸)</label>
-                <input type="number" id="bankroll" value="100000" step="1000" inputmode="numeric">
+                <input type="number" id="bankroll" value="100000" step="1000" inputmode="numeric" oninput="calculateAll()">
             </div>
             <div class="form-group">
                 <label for="kellyFraction">Келли (Риск)</label>
-                <select id="kellyFraction">
+                <select id="kellyFraction" onchange="calculateAll()">
                     <option value="0.25">1/4 Kelly (Безопасный)</option>
                     <option value="0.5">1/2 Kelly (Умеренный)</option>
                     <option value="1.0">Full Kelly (Агрессивный)</option>
                 </select>
             </div>
         </div>
-        <button class="btn-calc" onclick="calculateAll()">Пересчитать модель</button>
     </div>
 
-    <!-- Тайм -->
+    <!-- Переключатель Тайма / Анализ тоталов -->
     <div class="card">
         <div class="segmented-control">
             <button class="segment-btn active" id="btnHalf1" onclick="setHalf(1)">1-й Тайм (44%)</button>
             <button class="segment-btn" id="btnHalf2" onclick="setHalf(2)">2-й Тайм (56%)</button>
+            <button class="segment-btn" id="btnHalfFull" onclick="setHalf(0)">Весь матч</button>
         </div>
         <div id="halfResults"></div>
+    </div>
+
+    <!-- ИНДИВИДУАЛЬНЫЙ ТОТАЛ (ИСПРАВЛЕННЫЙ И РАСШИРЕННЫЙ) -->
+    <div class="card">
+        <h2>🎯 Индивидуальные Тоталы (ИТБ / ИТМ)</h2>
+        <div class="grid-2">
+            <div class="form-group">
+                <label for="teamSelect">Выберите команду</label>
+                <select id="teamSelect" onchange="renderIndividualTotals()">
+                    <option value="home">Хозяева</option>
+                    <option value="away">Гости</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="indTotalLine">Линия Тотала</label>
+                <input type="number" id="indTotalLine" step="0.5" value="4.5" inputmode="decimal" oninput="renderIndividualTotals()">
+            </div>
+        </div>
+        <div id="indTotalOutput"></div>
     </div>
 
     <!-- Декодер коэффициентов -->
@@ -235,11 +305,11 @@
         <h2>🗣 Декодер «Языка Букмекеры»</h2>
         <div class="grid-2">
             <div class="form-group">
-                <label for="kOver">Кэф на ТБ (<span id="targetTotalLabel">3.5</span>)</label>
+                <label for="kOver">Кэф на ТБ (<span id="targetTotalLabel">4.5</span>)</label>
                 <input type="number" id="kOver" step="0.01" value="1.95" inputmode="decimal" oninput="decodeBookie()">
             </div>
             <div class="form-group">
-                <label for="kUnder">Кэф на ТМ (<span id="targetTotalLabelUnder">3.5</span>)</label>
+                <label for="kUnder">Кэф на ТМ (<span id="targetTotalLabelUnder">4.5</span>)</label>
                 <input type="number" id="kUnder" step="0.01" value="1.85" inputmode="decimal" oninput="decodeBookie()">
             </div>
         </div>
@@ -251,58 +321,94 @@
     <button class="btn-send" onclick="sendDataToChat()">📩 Отправить расчет в чат</button>
 
 <script>
-    const tg = window.Telegram.WebApp;
-    tg.expand();
-    tg.ready();
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+        tg.expand();
+        tg.ready();
+    }
 
-    let activeHalf = 1;
+    let activeHalf = 1; // 1 = 1st half, 2 = 2nd half, 0 = Full Match
+    let activeSeason = 'full';
     let mathData = {};
-    const phi = 1.18;
+    const phi = 1.18; // Корректирующий коэффициент Пуассона для угловых
     let currentAnalysis = {};
+
+    // Коэффициенты сезонного тренда
+    const seasonModifiers = {
+        full: { home: 1.0, away: 1.0 },
+        autumn: { home: 1.05, away: 0.95 }, // Осенью хозяева играют более агрессивно на свежем поле
+        spring: { home: 0.98, away: 1.02 }  // Весной под конец сезона выездные матчи более прагматичны
+    };
 
     function formatKZT(amount) {
         return new Intl.NumberFormat('ru-RU').format(Math.round(amount)) + ' ₸';
     }
 
-    function customPoisson(k, lambda, phi) {
+    // Корректный пуассоновский расчет одиночного события (для ИТБ/ИТМ)
+    function customPoissonSingle(k, lambda, phi) {
         let adjLambda = lambda / phi;
         let factorial = 1;
         for (let i = 1; i <= k; i++) factorial *= i;
         return (Math.pow(adjLambda, k) * Math.exp(-adjLambda)) / factorial;
     }
 
+    function setSeasonPeriod(period) {
+        activeSeason = period;
+        document.getElementById('btnSeasonFull').classList.toggle('active', period === 'full');
+        document.getElementById('btnSeasonAutumn').classList.toggle('active', period === 'autumn');
+        document.getElementById('btnSeasonSpring').classList.toggle('active', period === 'spring');
+        calculateAll();
+    }
+
     function setHalf(half) {
         activeHalf = half;
         document.getElementById('btnHalf1').classList.toggle('active', half === 1);
         document.getElementById('btnHalf2').classList.toggle('active', half === 2);
+        document.getElementById('btnHalfFull').classList.toggle('active', half === 0);
         
-        const target = half === 1 ? '3.5' : '4.5';
+        let target = '4.5';
+        if (half === 1) target = '3.5';
+        else if (half === 2) target = '4.5';
+        else target = '9.5';
+
         document.getElementById('targetTotalLabel').innerText = target;
         document.getElementById('targetTotalLabelUnder').innerText = target;
 
         renderHalfUI();
+        renderIndividualTotals();
         decodeBookie();
     }
 
     function calculateAll() {
-        const homeAvg = parseFloat(document.getElementById('homeAvg').value) || 0;
-        const awayAvg = parseFloat(document.getElementById('awayAvg').value) || 0;
+        const homeAvgBase = parseFloat(document.getElementById('homeAvgFull').value) || 0;
+        const awayAvgBase = parseFloat(document.getElementById('awayAvgFull').value) || 0;
+        const homeConceded = parseFloat(document.getElementById('homeConceded').value) || 0;
+        const awayConceded = parseFloat(document.getElementById('awayConceded').value) || 0;
 
-        mathData[1] = processHalf(homeAvg * 0.44, awayAvg * 0.44, [3.5, 4.5, 5.5]);
-        mathData[2] = processHalf(homeAvg * 0.56, awayAvg * 0.56, [4.5, 5.5, 6.5]);
+        // Корректировка с учетом сезонного фактора и защиты соперника
+        const seasonMod = seasonModifiers[activeSeason];
+        const calcHomeAvg = ((homeAvgBase + awayConceded) / 2) * seasonMod.home;
+        const calcAwayAvg = ((awayAvgBase + homeConceded) / 2) * seasonMod.away;
+
+        // 1 тайм (44%), 2 тайм (56%), Весь матч (100%)
+        mathData[1] = processHalf(calcHomeAvg * 0.44, calcAwayAvg * 0.44, [3.5, 4.5, 5.5]);
+        mathData[2] = processHalf(calcHomeAvg * 0.56, calcAwayAvg * 0.56, [4.5, 5.5, 6.5]);
+        mathData[0] = processHalf(calcHomeAvg, calcAwayAvg, [8.5, 9.5, 10.5]);
 
         renderHalfUI();
+        renderIndividualTotals();
         decodeBookie();
     }
 
     function processHalf(lHome, lAway, totals) {
-        let maxC = 12;
+        let maxC = 16;
         let probArray = new Array(maxC + 1).fill(0);
 
-        for (let i = 0; i <= 8; i++) {
-            let pH = customPoisson(i, lHome, phi);
-            for (let j = 0; j <= 8; j++) {
-                let pA = customPoisson(j, lAway, phi);
+        // Вероятности для общего тотала
+        for (let i = 0; i <= 10; i++) {
+            let pH = customPoissonSingle(i, lHome, phi);
+            for (let j = 0; j <= 10; j++) {
+                let pA = customPoissonSingle(j, lAway, phi);
                 if (i + j <= maxC) probArray[i + j] += pH * pA;
             }
         }
@@ -317,20 +423,77 @@
         });
 
         return {
+            lHome: lHome,
+            lAway: lAway,
             expected: lHome + lAway,
             probArray: probArray,
             totals: resTotals
         };
     }
 
+    // ИСПРАВЛЕННЫЙ РАСЧЕТ ИНДИВИДУАЛЬНОГО ТОТАЛА
+    function renderIndividualTotals() {
+        const data = mathData[activeHalf];
+        if (!data) return;
+
+        const isHome = document.getElementById('teamSelect').value === 'home';
+        const teamName = isHome 
+            ? document.getElementById('homeTeamName').value 
+            : document.getElementById('awayTeamName').value;
+        const lambda = isHome ? data.lHome : data.lAway;
+        const line = parseFloat(document.getElementById('indTotalLine').value) || 4.5;
+
+        // Расчет индивидуальной вероятности до 12 угловых
+        let probArr = [];
+        for (let i = 0; i <= 12; i++) {
+            probArr[i] = customPoissonSingle(i, lambda, phi);
+        }
+        let normSum = probArr.reduce((a, b) => a + b, 0);
+        probArr = probArr.map(p => p / normSum);
+
+        // Рассчитываем ТБ и ТМ для выбранной линии
+        let overProb = probArr.slice(Math.floor(line) + 1).reduce((a, b) => a + b, 0);
+        let underProb = 1 - overProb;
+
+        let fairKOver = (1 / overProb).toFixed(2);
+        let fairKUnder = (1 / underProb).toFixed(2);
+
+        document.getElementById('indTotalOutput').innerHTML = `
+            <div class="results-grid">
+                <div class="result-card">
+                    <div class="title">Ожидаемо (${teamName})</div>
+                    <div class="value" style="color:var(--accent-purple) !important;">${lambda.toFixed(2)}</div>
+                </div>
+                <div class="result-card">
+                    <div class="title">Шанс ИТБ ${line}</div>
+                    <div class="value">${(overProb * 100).toFixed(1)}%</div>
+                </div>
+                <div class="result-card">
+                    <div class="title">Честный кэф ИТБ ${line}</div>
+                    <div class="value">${fairKOver}</div>
+                </div>
+                <div class="result-card">
+                    <div class="title">Честный кэф ИТМ ${line}</div>
+                    <div class="value">${fairKUnder}</div>
+                </div>
+            </div>
+        `;
+    }
+
     function renderHalfUI() {
         const data = mathData[activeHalf];
         if (!data) return;
 
+        let periodText = activeHalf === 1 ? "1-й Тайм" : activeHalf === 2 ? "2-й Тайм" : "Весь матч";
+
         let html = `
             <div class="results-grid">
                 <div class="result-card">
-                    <div class="title">Ожидаемо угл.</div>
+                    <div class="title">Период</div>
+                    <div class="value" style="font-size:0.95rem;">${periodText}</div>
+                </div>
+                <div class="result-card">
+                    <div class="title">Ожидаемо всего</div>
                     <div class="value">${data.expected.toFixed(2)}</div>
                 </div>
         `;
@@ -365,8 +528,15 @@
         if (!kOver || !kUnder || kOver <= 1 || kUnder <= 1) return;
 
         const margin = ((1 / kOver) + (1 / kUnder) - 1) * 100;
-        const targetTotal = activeHalf === 1 ? 3.5 : 4.5;
-        const myProbOver = mathData[activeHalf] ? mathData[activeHalf].totals[targetTotal].over : 0.5;
+        let targetTotal = 4.5;
+        if (activeHalf === 1) targetTotal = 3.5;
+        else if (activeHalf === 2) targetTotal = 4.5;
+        else targetTotal = 9.5;
+
+        const currentMath = mathData[activeHalf];
+        const myProbOver = (currentMath && currentMath.totals[targetTotal]) 
+            ? currentMath.totals[targetTotal].over 
+            : 0.5;
 
         const evOver = (myProbOver * kOver) - 1;
 
@@ -389,7 +559,8 @@
         const stakeAmountKZT = bankroll * kelly;
 
         currentAnalysis = {
-            half: activeHalf,
+            half: activeHalf === 0 ? "Весь матч" : `${activeHalf}-й Тайм`,
+            season: activeSeason === 'full' ? 'Весь год' : activeSeason === 'autumn' ? 'Осень' : 'Весна',
             expected: mathData[activeHalf] ? mathData[activeHalf].expected.toFixed(2) : 0,
             targetTotal: targetTotal,
             probOver: (myProbOver * 100).toFixed(1),
@@ -428,7 +599,12 @@
     function sendDataToChat() {
         if (!currentAnalysis.targetTotal) return;
 
-        const report = `📊 ОТЧЕТ ПО УГЛОВЫМ (${currentAnalysis.half}-й Тайм)\n\n` +
+        const homeName = document.getElementById('homeTeamName').value;
+        const awayName = document.getElementById('awayTeamName').value;
+
+        const report = `📊 ОТЧЕТ ПО УГЛОВЫМ: ${homeName} vs ${awayName}\n` +
+            `🗓 Сезонный отрезок: ${currentAnalysis.season}\n` +
+            `⏱ Отрезок игры: ${currentAnalysis.half}\n\n` +
             `🎯 Ожидаемо угловых: ${currentAnalysis.expected}\n` +
             `📈 Шанс ТБ ${currentAnalysis.targetTotal}: ${currentAnalysis.probOver}%\n` +
             `🎲 Кэфы БК: ТБ ${currentAnalysis.kOver} | ТМ ${currentAnalysis.kUnder}\n` +
@@ -436,15 +612,18 @@
             `💡 EV (Ценность): ${currentAnalysis.ev}%\n\n` +
             `💰 РЕКОМЕНДАЦИЯ:\n` +
             `Ставка: ${currentAnalysis.stakeKZT} (${currentAnalysis.kellyPercent}% от банка)\n\n` +
-            `💬 Мысль БК: ${currentAnalysis.speech}`;
+            `💬 Анализ: ${currentAnalysis.speech}`;
 
-        tg.sendData(report);
+        if (tg && tg.sendData) {
+            tg.sendData(report);
+        } else {
+            alert(report);
+        }
     }
 
     window.onload = function() {
         calculateAll();
     };
 </script>
-
 </body>
 </html>
